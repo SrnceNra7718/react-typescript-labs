@@ -1,40 +1,45 @@
 import { Card } from '$/common/components/card';
-import { useState } from 'react';
+import { useReducer, useState, type ActionDispatch } from 'react';
 import { Button } from './button';
+import { counterReducer, initialState, type CounterAction } from './counter-reducer';
 
-type CounterControlsProps = {
-  setCount: React.Dispatch<React.SetStateAction<number>>;
-};
+// type CounterControlsProps = {
+//   setCount: React.Dispatch<React.SetStateAction<number>>;
+// };
 
-/**
- * Form for updating the draft count and submitting it to update the main count.
- */
-type CounterFormProps = {
-  setCount: React.Dispatch<React.SetStateAction<number>>;
-  draftCount: number;
-  setDraftCount: React.Dispatch<React.SetStateAction<number>>;
-};
+// /**
+//  * Form for updating the draft count and submitting it to update the main count.
+//  */
+// type CounterFormProps = {
+//   setCount: React.Dispatch<React.SetStateAction<number>>;
+//   draftCount: number;
+//   setDraftCount: React.Dispatch<React.SetStateAction<number>>;
+// };
+
+type DispatchCountAction = { dispatch: ActionDispatch<[action: CounterAction]> };
 
 /**
  * Controls for incrementing, decrementing, and resetting the counter.
  */
-const CounterControls = ({ setCount }: CounterControlsProps) => {
+const CounterControls = ({ dispatch }: DispatchCountAction) => {
   return (
     <div className="flex gap-2">
-      <Button onClick={() => setCount((prev: number) => prev - 1)}>➖ Decrement</Button>
-      <Button onClick={() => setCount(0)}>🔁 Reset</Button>
-      <Button onClick={() => setCount((prev: number) => prev + 1)}>➕ Increment</Button>
+      <Button onClick={() => dispatch({ type: 'decrement' })}>➖ Decrement</Button>
+      <Button onClick={() => dispatch({ type: 'set-Count', payload: 0 })}>🔁 Reset</Button>
+      <Button onClick={() => dispatch({ type: 'increment' })}>➕ Increment</Button>
     </div>
   );
 };
 
-const CounterForm = ({ setCount, draftCount, setDraftCount }: CounterFormProps) => {
+const CounterForm = ({ dispatch }: DispatchCountAction) => {
+  const [draftCount, setDraftCount] = useState<number>(0);
+
   return (
     <form
       className="flex items-center gap-2"
       onSubmit={(e) => {
         e.preventDefault();
-        setCount(draftCount);
+        dispatch({ type: 'set-Count', payload: draftCount });
       }}
     >
       <input
@@ -49,6 +54,10 @@ const CounterForm = ({ setCount, draftCount, setDraftCount }: CounterFormProps) 
 };
 
 export const Counter = () => {
+  const [counts, dispatch] = useReducer(counterReducer, initialState);
+
+  dispatch({ type: 'set-Count', payload: 0 });
+
   const [count, setCount] = useState<number>(0);
   const [draftCount, setDraftCount] = useState<number>(0);
 
