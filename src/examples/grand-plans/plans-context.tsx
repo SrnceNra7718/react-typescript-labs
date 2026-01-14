@@ -1,6 +1,7 @@
 import { createContext, useState, type PropsWithChildren } from 'react';
 import * as Api from './api';
 import type { Plan } from './types';
+import React from 'react';
 
 type PlansContextType = {
   plans: Plan[];
@@ -9,7 +10,24 @@ type PlansContextType = {
   removePlan: (id: number) => Promise<void>;
 };
 
-const PlansContext = createContext<PlansContextType | undefined>(undefined);
+const PlansContext = createContext<PlansContextType>(null as unknown as PlansContextType);
+
+// export const dummyFunction = (value: string | null) => {
+//   if (value === null) throw new Error('Value cannot be null');
+//   console.log(value);
+// };
+
+export const createBetterContext = <T,>() => {
+  const Context = createContext<T | null>(null);
+  const useContext = () => {
+    const ctx = React.useContext(Context);
+    if (ctx === null) {
+      throw new Error('useContext must be used within a Provider with a value');
+    }
+    return ctx;
+  };
+  return [useContext, Context.Provider] as const;
+};
 
 export const PlansProvider = ({ children }: PropsWithChildren) => {
   const [plans, setPlans] = useState<Plan[]>([]);
